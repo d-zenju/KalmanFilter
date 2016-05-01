@@ -11,6 +11,7 @@ class LinearKalmanFilter:
 	def __init__(self, x, P, F, G, u, H, Q, R):
 		self.x = x
 		self.P = P
+		
 		self.F = F
 		self.G = G
 		self.u = u
@@ -36,12 +37,13 @@ class LinearKalmanFilter:
 		S = self.H * P_ * self.H.T + self.R
 		
 		# Filter Gain(Kalman Gain)
-		W = P_ * self.H.T * S.I
+		K = P_ * self.H.T * S.I
 		
 		# Updated state covariance
-		self.P = P_ - W * S * W.I
+		self.P = P_ - K * self.H * P_
+		#self.P = P_ - K * S * K.T (mistake ?)
 		
 		# Updated State Estimate
-		self.x = x_ + W * v
+		self.x = x_ + K * v
 		
 		return self.x

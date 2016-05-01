@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from LinearKalmanFilter import LinearKalmanFilter
 
 
 class KalmanFilter:
@@ -25,8 +26,7 @@ class KalmanFilter:
         self.mu = mu_ + K * error
         self.Sigma = Sigma_ - K * self.H * Sigma_
         
-        print S, K
-        return self.mu, self.Sigma
+        return self.mu
 
 
 def main():
@@ -40,34 +40,23 @@ def main():
     u = np.mat([[2], [2]])
     Q = np.mat([[1, 0], [0, 1]])
     
-    C = np.mat([[1, 0], [0, 1]])
+    H = np.mat([[1, 0], [0, 1]])
     R = np.mat([[2, 0], [0, 2]])
-    
-    print 'T=', T
-    print 'x=', x
-    print 'X=', X
-    print 'Y=', Y
-    print 'A=', A
-    print 'B=', B
-    print 'u=', u
-    print 'Q=', Q
-    print 'C=', C
-    print 'R=', R
-    
     
     for i in range(T):
         x = A * x + B * u + np.random.multivariate_normal([0, 0], Q, 1).T
         X.append(x)
-        y = C * x + np.random.multivariate_normal([0, 0], R, 1).T
+        y = H * x + np.random.multivariate_normal([0, 0], R, 1).T
         Y.append(y)
     
     mu = np.mat([[0], [0]])
     Sigma = np.mat([[0, 0], [0, 0]])
     M = [mu]
-    
-    lkf = KalmanFilter(A, B, u, Q, C, R, mu, Sigma)
+    lkf = LinearKalmanFilter(mu, Sigma, A, B, u, H, Q, R)
+    #lkf = KalmanFilter(A, B, u, Q, H, R, mu, Sigma)
     for i in range(T):
-        mu, Sigma = lkf.update(Y[i+1])
+        #mu, Sigma = lkf.update(Y[i+1])
+        mu = lkf.update(Y[i+1])
         M.append(mu)
     
     a, b = np.array(np.concatenate(X, axis = 1))
